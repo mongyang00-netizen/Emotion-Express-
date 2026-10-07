@@ -330,12 +330,15 @@ export default function App() {
             <div className="w-16 h-16 rounded-2xl bg-amber-100 text-amber-800 text-3xl mx-auto flex items-center justify-center shadow-xs">
               🎉
             </div>
-            <div>
+            <div className="space-y-1.5">
               <h3 className="text-xl font-black text-slate-900">
                 You finished the story!
               </h3>
-              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed font-medium">
-                &ldquo;The Unread Message&rdquo; 8페이지를 끝까지 멋지게 읽었습니다.
+              <p
+                className="text-xs text-slate-600 leading-relaxed font-medium"
+                style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}
+              >
+                &ldquo;The Unread Message&rdquo; 8페이지를 모두 읽었어요! 이번에는 퀴즈를 풀고 4개의 감정 스탬프를 모아볼까요?
               </p>
             </div>
             <div className="space-y-2 pt-2">
@@ -343,18 +346,17 @@ export default function App() {
                 onClick={() => {
                   soundEngine.playPop();
                   setFreeReadingFinished(false);
-                  setReadingMode('mission');
-                  setCurrentPage(9);
+                  handleStartStory();
                 }}
                 className="w-full py-3.5 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-sm active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span>🚂 Emotion Express Pass 만들기</span>
+                <span>🚂 이번에는 스탬프 모아보기</span>
               </button>
               <button
                 onClick={() => {
                   soundEngine.playPop();
                   setFreeReadingFinished(false);
-                  handleReadAgain();
+                  handleStartFreeReading();
                 }}
                 className="w-full py-2.5 px-4 rounded-2xl font-bold text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 active:scale-98 transition-all cursor-pointer"
               >
