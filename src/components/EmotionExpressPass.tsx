@@ -80,28 +80,7 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
       const arrayBuffer = pdf.output('arraybuffer');
       const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
 
-      // If on mobile and Web Share API is available, share directly for native Android/iOS file saving
-      if (typeof navigator !== 'undefined' && 'canShare' in navigator && 'share' in navigator) {
-        try {
-          const file = new File([blob], fileName, { type: 'application/pdf', lastModified: Date.now() });
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: 'Emotion Express Pass',
-              text: 'Emotion Express Pass 완료 인증서',
-            });
-            soundEngine.playCorrect();
-            return;
-          }
-        } catch (shareErr) {
-          // If user cancelled the share dialog or device threw, proceed to direct download fallback
-          if ((shareErr as Error).name === 'AbortError') {
-            return;
-          }
-        }
-      }
-
-      // Universal Android & Desktop direct download using persistent Blob URL
+      // Direct file download using persistent Blob URL
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
@@ -110,7 +89,7 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
       document.body.appendChild(link);
       link.click();
 
-      // CRITICAL FOR ANDROID: Keep blobUrl active for 60 seconds so Android Download Manager completes asynchronously without 0-byte truncation
+      // Keep blobUrl active for 60 seconds so async download managers complete without truncation
       setTimeout(() => {
         try {
           if (document.body.contains(link)) {
@@ -151,25 +130,8 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
       const safeName = passData.studentName.replace(/[/\\?%*:|"<>]/g, '').trim() || 'Student';
       const fileName = `Emotion_Express_Pass_${safeName}.png`;
 
-      canvas.toBlob(async (blob) => {
+      canvas.toBlob((blob) => {
         if (!blob) return;
-
-        // Mobile Web Share API option
-        if (typeof navigator !== 'undefined' && 'canShare' in navigator && 'share' in navigator) {
-          try {
-            const file = new File([blob], fileName, { type: 'image/png', lastModified: Date.now() });
-            if (navigator.canShare({ files: [file] })) {
-              await navigator.share({
-                files: [file],
-                title: 'Emotion Express Pass Image',
-              });
-              soundEngine.playCorrect();
-              return;
-            }
-          } catch (shareErr) {
-            if ((shareErr as Error).name === 'AbortError') return;
-          }
-        }
 
         const blobUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
