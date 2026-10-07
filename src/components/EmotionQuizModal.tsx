@@ -182,7 +182,10 @@ export const EmotionQuizModal: React.FC<EmotionQuizModalProps> = ({
                   &lsquo;{emotionInfo.word} ({emotionInfo.koreanMeaning.split(',')[0]})&rsquo; 스탬프 획득!
                 </h4>
               </div>
-              <p className="text-xs sm:text-sm text-slate-700 font-medium bg-white/80 p-3 rounded-xl border border-amber-200">
+              <p
+                className="text-xs sm:text-sm text-slate-700 font-medium bg-white/80 p-3 rounded-xl border border-amber-200 leading-relaxed"
+                style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}
+              >
                 {question.explanation}
               </p>
             </div>
@@ -195,7 +198,10 @@ export const EmotionQuizModal: React.FC<EmotionQuizModalProps> = ({
                 <HelpCircle size={16} />
                 <span>다시 한번 확인해 볼까요?</span>
               </div>
-              <p className="text-xs text-slate-700 font-medium leading-relaxed">
+              <p
+                className="text-xs text-slate-700 font-medium leading-relaxed"
+                style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}
+              >
                 {question.hint}
               </p>
               <div className="flex items-center gap-3 pt-1">

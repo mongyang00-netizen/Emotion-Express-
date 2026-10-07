@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX, ArrowRight, ArrowLeft, Languages, AlertCircle, BookOpen, Undo2 } from 'lucide-react';
-import { StoryPageData, CoreEmotionId } from '../types/story';
+import { StoryPageData, CoreEmotionId, ReadingMode } from '../types/story';
 import { CORE_EMOTIONS } from '../data/storyData';
 import { STORY_TIMINGS } from '../data/storyTimings';
 import { soundEngine } from '../utils/soundEffects';
@@ -11,6 +11,7 @@ interface StoryPageProps {
   totalPages: number;
   hasListened: boolean;
   quizReturnId: number | null;
+  readingMode: ReadingMode;
   onReturnToQuiz: () => void;
   onPageSelect: (pageNumber: number) => void;
   onMarkListened: () => void;
@@ -24,6 +25,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({
   totalPages,
   hasListened,
   quizReturnId,
+  readingMode,
   onReturnToQuiz,
   onPageSelect,
   onMarkListened,
@@ -100,8 +102,8 @@ export const StoryPage: React.FC<StoryPageProps> = ({
         if (firstWord && currentTime <= firstWord.end) {
           activeWordItem = firstWord;
         } else {
-          // Responsive lead time (~0.16s) to ensure highlight leads naturally without skipping
-          const lead = 0.16;
+          // Responsive lead time: slightly higher on page 1 (~0.26s) for instant sync as requested by user
+          const lead = page.pageNumber === 1 ? 0.26 : 0.18;
           const targetTime = currentTime + lead;
           activeWordItem = timingData.words.find(
             (w) => targetTime >= w.start && targetTime < w.end
@@ -196,7 +198,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({
   };
 
   return (
-    <div className="flex flex-col max-w-xl mx-auto w-full px-2.5 sm:px-4 py-1.5 sm:py-2.5 space-y-2 sm:space-y-3">
+    <div className="flex flex-col max-w-xl md:max-w-2xl mx-auto w-full px-2.5 sm:px-4 py-1.5 sm:py-2.5 space-y-2 sm:space-y-3">
       {/* Return to Question Mission Banner if reviewing from a quiz */}
       {quizReturnId !== null && (
         <div className="bg-amber-500 text-white p-2 rounded-2xl flex items-center justify-between shadow-md animate-in slide-in-from-top duration-200">
@@ -218,11 +220,11 @@ export const StoryPage: React.FC<StoryPageProps> = ({
       )}
 
       {/* Page Navigation Bar (1 to 8 Direct Jump Buttons) */}
-      <div className="flex items-center justify-between bg-white/95 px-2.5 py-1 rounded-2xl border border-amber-200 shadow-2xs">
+      <div className="flex items-center justify-between bg-white/95 px-3 py-1.5 rounded-2xl border border-amber-200 shadow-2xs">
         <span className="text-[11px] sm:text-xs font-bold text-amber-900 px-1 shrink-0">
           페이지 이동:
         </span>
-        <div className="flex items-center gap-1 overflow-x-auto py-0.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => {
             const isCurrent = num === page.pageNumber;
             return (
@@ -233,7 +235,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({
                   soundEngine.playPop();
                   onPageSelect(num);
                 }}
-                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl font-bold text-xs transition-all flex items-center justify-center cursor-pointer ${
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl font-black text-xs transition-all flex items-center justify-center cursor-pointer ${
                   isCurrent
                     ? 'bg-amber-600 text-white shadow-xs scale-105'
                     : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/60'
@@ -249,15 +251,15 @@ export const StoryPage: React.FC<StoryPageProps> = ({
 
       {/* Illustration & Story Content Container */}
       <div className="space-y-2 sm:space-y-2.5">
-        {/* Top: Natural Proportional Illustration Card (Never cropped or sliced, preserving full art) */}
-        <div className="relative w-full aspect-4/3 max-h-[36vh] sm:max-h-[42vh] rounded-2xl sm:rounded-3xl overflow-hidden bg-amber-100 shadow-sm border border-amber-200/90 group flex items-center justify-center">
+        {/* Top: Natural Proportional Illustration Card (Never cropped or sliced, preserving full art on both mobile and desktop) */}
+        <div className="relative w-full aspect-4/3 max-h-[38vh] sm:max-h-[46vh] md:max-h-[50vh] rounded-2xl sm:rounded-3xl overflow-hidden bg-amber-100/80 shadow-sm border border-amber-200/90 group flex items-center justify-center">
           {!imgError ? (
             <img
               src={page.image}
               alt={page.imageAlt}
               referrerPolicy="no-referrer"
               onError={() => setImgError(true)}
-              className="w-full h-full object-contain sm:object-cover transition-transform duration-500 group-hover:scale-101"
+              className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-101"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-amber-100 via-orange-50 to-amber-200 text-center">
@@ -448,19 +450,19 @@ export const StoryPage: React.FC<StoryPageProps> = ({
               }
             }}
             disabled={!hasListened}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm ${
+            className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-black text-sm sm:text-base transition-all shadow-md active:scale-95 ${
               hasListened
-                ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white cursor-pointer active:scale-95'
+                ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-700 hover:to-orange-700 text-white cursor-pointer shadow-amber-500/25'
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
             }`}
             title={hasListened ? '다음 단계로 이동' : '[Read to me]를 먼저 들어보세요'}
           >
-            <span>{page.hasQuestionAfter ? '감정 질문 풀기' : 'Next'}</span>
-            <ArrowRight size={16} />
+            <span>{readingMode === 'free' ? 'Next' : page.hasQuestionAfter ? '감정 질문 풀기' : 'Next'}</span>
+            <ArrowRight size={18} />
           </button>
 
           {!hasListened && (
-            <span className="text-[11px] text-amber-700 font-medium mt-1 flex items-center gap-1">
+            <span className="text-[11px] text-amber-700 font-semibold mt-1 flex items-center gap-1">
               <AlertCircle size={12} />
               <span>[Read to me]를 눌러 먼저 들어보세요!</span>
             </span>

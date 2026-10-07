@@ -18,7 +18,7 @@ import { WordModal } from './components/WordModal';
 import { EmotionQuizModal } from './components/EmotionQuizModal';
 import { ReflectionScreen } from './components/ReflectionScreen';
 import { EmotionExpressPass } from './components/EmotionExpressPass';
-import { STORY_PAGES, EMOTION_QUESTIONS } from './data/storyData';
+import { STORY_PAGES, EMOTION_QUESTIONS, CORE_EMOTIONS } from './data/storyData';
 import { CoreEmotionId, ReadingMode, UserPassData, QuizAttempt } from './types/story';
 import { soundEngine } from './utils/soundEffects';
 import { pronunciationPlayer } from './utils/pronunciation';
@@ -49,6 +49,9 @@ export default function App() {
 
   // Returning to quiz mission from story review
   const [quizReturnId, setQuizReturnId] = useState<number | null>(null);
+
+  // Incomplete missions modal state (when user reaches end without completing all 4 quizzes)
+  const [showIncompleteNotice, setShowIncompleteNotice] = useState<boolean>(false);
 
   // Completed Pass Data
   const [passData, setPassData] = useState<UserPassData | null>(null);
@@ -140,6 +143,16 @@ export default function App() {
       setCurrentPage((prev) => prev + 1);
     } else {
       if (readingMode === 'mission') {
+        // STRICT REQUIREMENT: Explorer must have truly solved all 4 questions (collected all 4 stamps)
+        const allFourStamps: CoreEmotionId[] = ['worried', 'anxious', 'relieved', 'excited'];
+        const missingStamp = allFourStamps.find((s) => !stamps.includes(s));
+
+        if (missingStamp) {
+          // Show friendly guidance modal without forcing jump
+          setShowIncompleteNotice(true);
+          return;
+        }
+
         setCurrentPage(9); // Reflection & Pass creation
       } else {
         // Free reading mode completed page 8!
@@ -210,9 +223,18 @@ export default function App() {
   const handleQuizContinue = () => {
     setActiveQuizId(null);
     setQuizReturnId(null);
+
+    // Check if there are any remaining questions before page 9
+    const allFourStamps: CoreEmotionId[] = ['worried', 'anxious', 'relieved', 'excited'];
+    const remainingMissing = allFourStamps.find((s) => !stamps.includes(s));
+
     if (currentPage < totalPages) {
       setCurrentPage((prev) => prev + 1);
     } else {
+      if (remainingMissing) {
+        setShowIncompleteNotice(true);
+        return;
+      }
       setCurrentPage(9);
     }
   };
@@ -273,6 +295,7 @@ export default function App() {
             totalPages={totalPages}
             hasListened={Boolean(listenedPages[currentPage])}
             quizReturnId={quizReturnId}
+            readingMode={readingMode}
             onReturnToQuiz={handleReturnToQuiz}
             onPageSelect={handlePageSelect}
             onMarkListened={() => handleMarkListened(currentPage)}
@@ -309,7 +332,7 @@ export default function App() {
             </div>
             <div>
               <h3 className="text-xl font-black text-slate-900">
-                이야기를 모두 완독했어요!
+                You finished the story!
               </h3>
               <p className="text-xs text-slate-600 mt-1.5 leading-relaxed font-medium">
                 &ldquo;The Unread Message&rdquo; 8페이지를 끝까지 멋지게 읽었습니다.
@@ -335,7 +358,7 @@ export default function App() {
                 }}
                 className="w-full py-2.5 px-4 rounded-2xl font-bold text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 active:scale-98 transition-all cursor-pointer"
               >
-                처음부터 다시 읽기
+                Read again
               </button>
               <button
                 onClick={() => {
@@ -345,7 +368,97 @@ export default function App() {
                 }}
                 className="w-full py-2.5 px-4 rounded-2xl font-bold text-xs text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
               >
-                홈으로 돌아가기
+                Home
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Incomplete Missions Guidance Modal */}
+      {showIncompleteNotice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white max-w-sm w-full rounded-3xl p-6 shadow-2xl border-2 border-amber-300 text-center space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-2xl bg-amber-100 text-amber-800 text-3xl mx-auto flex items-center justify-center shadow-xs">
+              🚂
+            </div>
+            <div className="space-y-1.5">
+              <h3
+                className="text-lg sm:text-xl font-black text-slate-900 leading-snug"
+                style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}
+              >
+                아직 풀지 않은 문제가 있어요!
+              </h3>
+              <p
+                className="text-xs text-slate-600 leading-relaxed font-medium"
+                style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}
+              >
+                Emotion Express Pass를 발급받으려면 4개의 감정 미션을 모두 완료해야 해요. (현재 모은 스탬프: {stamps.length} / 4개)
+              </p>
+            </div>
+
+            {/* Missing Stamps Badge Icons */}
+            <div className="flex items-center justify-center gap-2 py-1">
+              {(['worried', 'anxious', 'relieved', 'excited'] as CoreEmotionId[]).map((key) => {
+                const isCollected = stamps.includes(key);
+                const info = CORE_EMOTIONS[key];
+                return (
+                  <div
+                    key={key}
+                    className={`flex flex-col items-center p-1.5 rounded-xl border text-center transition-all ${
+                      isCollected
+                        ? 'bg-amber-100/80 border-amber-300 text-amber-900 font-bold'
+                        : 'bg-slate-100/80 border-dashed border-slate-300 text-slate-400'
+                    }`}
+                  >
+                    <span className="text-base">{isCollected ? info.stampIcon : '○'}</span>
+                    <span className="text-[10px] capitalize mt-0.5">{info.word}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <button
+                onClick={() => {
+                  soundEngine.playPop();
+                  setShowIncompleteNotice(false);
+                  handleReadAgain();
+                }}
+                className="w-full py-3 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-sm active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>📖 이야기 처음부터 다시 읽기</span>
+              </button>
+
+              {(() => {
+                const allFourStamps: CoreEmotionId[] = ['worried', 'anxious', 'relieved', 'excited'];
+                const firstMissing = allFourStamps.find((s) => !stamps.includes(s));
+                const missingQ = firstMissing ? Object.values(EMOTION_QUESTIONS).find((q) => q.coreEmotionId === firstMissing) : null;
+                if (!missingQ) return null;
+
+                return (
+                  <button
+                    onClick={() => {
+                      soundEngine.playPop();
+                      setShowIncompleteNotice(false);
+                      setCurrentPage(missingQ.pageAfter);
+                      setActiveQuizId(missingQ.id);
+                    }}
+                    className="w-full py-2.5 px-4 rounded-2xl font-bold text-xs bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 active:scale-98 transition-all cursor-pointer"
+                  >
+                    미완료 문제 풀러 가기 (Page {missingQ.pageAfter})
+                  </button>
+                );
+              })()}
+
+              <button
+                onClick={() => {
+                  soundEngine.playPop();
+                  setShowIncompleteNotice(false);
+                }}
+                className="w-full py-2 px-4 rounded-2xl font-bold text-xs text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
+              >
+                닫기
               </button>
             </div>
           </div>

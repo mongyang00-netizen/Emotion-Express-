@@ -39,7 +39,7 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
   const selectedEmotion = CORE_EMOTIONS[passData.selectedEmotionId] || CORE_EMOTIONS['excited'];
   const stampKeys: CoreEmotionId[] = ['worried', 'anxious', 'relieved', 'excited'];
 
-  // Helper to safely render canvas: 100% immune to oklab CSS parser crashes
+  // Helper to generate the exact ticket canvas: 100% offline, zero CSS/remote font security errors
   const captureTicketCanvas = async (): Promise<HTMLCanvasElement> => {
     return await generatePassCanvas(passData, selectedScene, selectedEmotion, sceneImgRef.current);
   };
@@ -54,23 +54,23 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
       const canvas = await captureTicketCanvas();
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-      // High-resolution A4 Landscape Certificate (297 x 210 mm)
+      // High-resolution A4 Certificate
+      const isLandscape = canvas.width > canvas.height;
       const pdf = new jsPDF({
-        orientation: 'landscape',
+        orientation: isLandscape ? 'landscape' : 'portrait',
         unit: 'mm',
         format: 'a4',
       });
 
-      const pageWidth = pdf.internal.pageSize.getWidth(); // 297mm
-      const pageHeight = pdf.internal.pageSize.getHeight(); // 210mm
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 10;
-      const pdfImageWidth = pageWidth - margin * 2; // 277mm
-      const pdfImageHeight = (canvas.height * pdfImageWidth) / canvas.width; // ~189mm
+      const pdfImageWidth = pageWidth - margin * 2;
+      const pdfImageHeight = (canvas.height * pdfImageWidth) / canvas.width;
 
-      // Centered vertically
       const offsetY = Math.max(margin, (pageHeight - pdfImageHeight) / 2);
 
-      pdf.addImage(imgData, 'JPEG', margin, offsetY, pdfImageWidth, pdfImageHeight);
+      pdf.addImage(imgData, 'JPEG', margin, offsetY, pdfImageWidth, Math.min(pdfImageHeight, pageHeight - margin * 2));
 
       // Trigger download compatible with iOS Safari, Chrome Mobile & Desktop
       const fileName = `Emotion_Express_Pass_${passData.studentName.replace(/\s+/g, '_')}.pdf`;
@@ -90,7 +90,6 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
       soundEngine.playCorrect();
     } catch (err) {
       console.error('PDF Download failed:', err);
-      // Native fallback
       try {
         const fallbackPdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         fallbackPdf.text('EMOTION EXPRESS PASS', 20, 30);
@@ -142,7 +141,7 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
           <span>Pass Issued Successfully!</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          Emotion Express Pass
+          You finished the story!
         </h2>
         <p className="text-xs sm:text-sm text-slate-600 font-medium">
           축하합니다! 4개의 감정을 모두 마스터하고 나만의 패스를 완성했어요.
@@ -286,40 +285,35 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
         </div>
       </div>
 
-      {/* 5. Mission Quiz Review Report (문제 풀이 결과 및 틀린 문제 복습) */}
+      {/* 5. Mission Quiz Review Report (간결하고 깔끔한 미션 결과 분석 카드) */}
       {passData.quizAttempts && passData.quizAttempts.length > 0 && (
-        <div className="w-full bg-white rounded-3xl border border-amber-200/90 p-4 sm:p-5 shadow-sm space-y-3.5 text-left print:hidden">
-          <div className="flex items-center justify-between border-b border-amber-100 pb-2.5">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">📝</span>
-              <div>
-                <h4 className="text-sm sm:text-base font-black text-slate-900">
-                  미션 이해 문제 결과 분석
-                </h4>
-                <p className="text-[11px] text-slate-500">
-                  내가 푼 4대 감정 미션의 정답 및 오답 기록을 확인해 보세요.
-                </p>
-              </div>
+        <div className="w-full bg-white rounded-3xl border border-amber-200/90 p-4 sm:p-5 shadow-xs space-y-3 text-left print:hidden">
+          <div className="flex items-center justify-between border-b border-amber-100/80 pb-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-lg">📝</span>
+              <h4 className="text-sm font-black text-slate-900">
+                미션 결과 요약
+              </h4>
             </div>
 
             {/* Quick summary badge */}
             {(() => {
               const wrongCount = passData.quizAttempts.filter((a) => !a.firstTryCorrect).length;
               return wrongCount === 0 ? (
-                <span className="text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded-full flex items-center gap-1">
-                  <CheckCircle size={13} className="text-emerald-600" />
-                  <span>모든 문제 첫 시도 완벽 정답! ⭐</span>
+                <span className="text-xs font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <CheckCircle size={12} className="text-emerald-600" />
+                  <span>모든 문제 원패스 정답! ⭐</span>
                 </span>
               ) : (
-                <span className="text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-full flex items-center gap-1">
-                  <AlertTriangle size={13} className="text-amber-600" />
-                  <span>{wrongCount}개 문제 재도전 후 통과</span>
+                <span className="text-xs font-black text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <AlertTriangle size={12} className="text-amber-600" />
+                  <span>{wrongCount}문제 재도전 완료</span>
                 </span>
               );
             })()}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {passData.quizAttempts.map((attempt) => {
               const emotionInfo = CORE_EMOTIONS[attempt.coreEmotionId];
               const wasPerfect = attempt.firstTryCorrect;
@@ -327,50 +321,41 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
               return (
                 <div
                   key={attempt.questionId}
-                  className={`p-3 rounded-2xl border text-xs transition-all ${
+                  className={`p-2.5 rounded-2xl border text-xs transition-all flex flex-col justify-between ${
                     wasPerfect
-                      ? 'bg-emerald-50/50 border-emerald-200 text-slate-800'
-                      : 'bg-rose-50/50 border-rose-200 text-slate-800'
+                      ? 'bg-emerald-50/40 border-emerald-200'
+                      : 'bg-rose-50/40 border-rose-200'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-bold text-[11px] text-slate-700 flex items-center gap-1">
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="font-bold text-[11px] text-slate-800 flex items-center gap-1 truncate">
                       <span>{emotionInfo?.stampIcon}</span>
                       <span>{attempt.stageTitle}</span>
                     </span>
-
-                    {wasPerfect ? (
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                        <CheckCircle size={10} />
-                        <span>한 번에 정답</span>
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                        <AlertTriangle size={10} />
-                        <span>오답 기록 있음 ({attempt.attemptsCount}회 시도)</span>
-                      </span>
-                    )}
+                    <span
+                      className={`text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 ${
+                        wasPerfect
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
+                      {wasPerfect ? '정답' : `${attempt.attemptsCount}회 시도`}
+                    </span>
                   </div>
 
-                  <p className="font-bold text-slate-900 leading-snug">
+                  <p className="font-semibold text-slate-800 line-clamp-1 mb-1.5 text-[11px]">
                     {attempt.questionText}
                   </p>
-                  <p className="text-[10px] text-slate-500 mt-0.5 mb-2">
-                    {attempt.questionKorean}
-                  </p>
 
-                  <div className="space-y-1 bg-white/90 p-2 rounded-xl border border-slate-100">
-                    <div className="flex items-center gap-1.5 text-[11px]">
-                      <span className="font-bold text-emerald-700 shrink-0">✔ 최종 정답:</span>
-                      <span className="font-semibold text-slate-800">{attempt.correctAnswer}</span>
+                  <div className="bg-white/90 p-1.5 rounded-xl border border-slate-100 text-[11px] space-y-0.5">
+                    <div className="flex items-center gap-1">
+                      <span className="font-black text-emerald-700 shrink-0">정답:</span>
+                      <span className="font-bold text-slate-900 truncate">{attempt.correctAnswer}</span>
                     </div>
-
                     {!wasPerfect && attempt.wrongAnswersChosen.length > 0 && (
-                      <div className="flex items-start gap-1.5 text-[11px] pt-0.5 border-t border-slate-100">
-                        <span className="font-bold text-rose-600 shrink-0">✘ 처음 고른 오답:</span>
-                        <span className="text-rose-900 font-medium line-through">
-                          {attempt.wrongAnswersChosen.join(', ')}
-                        </span>
+                      <div className="flex items-center gap-1 text-slate-500 text-[10px]">
+                        <span className="font-bold text-rose-600 shrink-0">오답:</span>
+                        <span className="line-through truncate">{attempt.wrongAnswersChosen.join(', ')}</span>
                       </div>
                     )}
                   </div>
@@ -416,7 +401,7 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
           className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white hover:bg-amber-50 text-slate-800 border border-slate-300 font-bold text-sm shadow-xs transition-transform active:scale-95 cursor-pointer"
         >
           <RotateCcw size={16} />
-          <span>다시 읽기</span>
+          <span>Read again</span>
         </button>
 
         <button
@@ -424,10 +409,10 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
             soundEngine.playPop();
             onGoHome();
           }}
-          className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold text-sm transition-transform active:scale-95 cursor-pointer"
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold text-sm transition-transform active:scale-95 cursor-pointer"
         >
           <Home size={16} />
-          <span>홈으로</span>
+          <span>Home</span>
         </button>
       </div>
     </div>

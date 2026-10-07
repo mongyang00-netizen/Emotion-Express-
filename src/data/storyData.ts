@@ -66,7 +66,7 @@ export const CORE_EMOTIONS: Record<string, CoreEmotionInfo> = {
   excited: {
     id: 'excited',
     word: 'excited',
-    koreanMeaning: '신이 난, 기대되는',
+    koreanMeaning: '신이 난',
     pronunciationGuide: '[익-사이-티드]',
     explanation: '기분 좋은 일이 기다리고 있어서 가슴이 뛰고 아주 즐거울 때 느끼는 감정이에요.',
     exampleSentence: 'The two friends were excited to ride bikes this weekend.',
@@ -220,7 +220,7 @@ export const EMOTION_QUESTIONS: Record<number, QuestionData> = {
       },
     ],
     hint: '힌트: 친구에게 보낸 메시지가 계속 unread(읽지 않은) 상태일 때 어떤 기분이 들까요?',
-    explanation: '정답이에요! 답장이 오지 않자 레오는 무슨 일이 생긴 건 아닐까 걱정스러운(worried) 감정을 느꼈어요.',
+    explanation: '정답이에요! 답장이 오지 않자 레오는 혹시 무슨 일이 생긴 건 아닐까 걱정스러운(worried) 마음이 들었어요.',
   },
   2: {
     id: 2,
@@ -248,7 +248,7 @@ export const EMOTION_QUESTIONS: Record<number, QuestionData> = {
       },
     ],
     hint: '힌트: 맥스가 나를 피하는 것 같아서 마음이 조마조마하고 불안해지는 상황을 생각해 보세요.',
-    explanation: '맞아요! 친구가 혹시 나에게 화가 났을까 봐 마음이 초조하고 불안한(anxious) 감정을 느꼈어요.',
+    explanation: '맞아요! 친구가 혹시 나에게 화가 났을까 봐 마음이 초조하고 불안한(anxious) 마음이 들었어요.',
   },
   3: {
     id: 3,
@@ -284,7 +284,7 @@ export const EMOTION_QUESTIONS: Record<number, QuestionData> = {
     stageTitle: '미션 4 · 하굣길의 순간',
     coreEmotionId: 'excited',
     questionText: 'Why was Leo excited on the way home?',
-    questionKorean: '집으로 가는 길에 레오는 왜 신이 나고 기대(excited)되었나요?',
+    questionKorean: '집으로 가는 길에 레오는 왜 신이 났나요(excited)?',
     options: [
       {
         text: 'He bought a new video game.',
@@ -304,7 +304,7 @@ export const EMOTION_QUESTIONS: Record<number, QuestionData> = {
       },
     ],
     hint: '힌트: 오해를 푼 두 친구가 이번 주말에 함께 무엇을 하기로 약속했는지 생각해 보세요.',
-    explanation: '완벽해요! 주말에 절친 맥스와 즐겁게 자전거를 타기로 약속해서 신이 나고 기대되는(excited) 감정을 느꼈어요.',
+    explanation: '완벽해요! 주말에 절친 맥스와 즐겁게 자전거를 타기로 약속해서 신이 난(excited) 마음이 들었어요.',
   },
 };
 
@@ -439,7 +439,7 @@ export const WORD_DICTIONARY: Record<string, { meaning: string; pos?: string }> 
   sweet: { meaning: '달콤한', pos: '형용사' },
   ice: { meaning: '얼음', pos: '명사' },
   cream: { meaning: '크림 (아이스크림)', pos: '명사' },
-  excited: { meaning: '신이 난, 기대되는 (★핵심 감정)', pos: '형용사' },
+  excited: { meaning: '신이 난 (★핵심 감정)', pos: '형용사' },
   for: { meaning: '~에 대하여, 위해', pos: '전치사' },
   see: { meaning: '보다, 알다', pos: '동사' },
   feel: { meaning: '느끼다, 기분이 들다', pos: '동사' },

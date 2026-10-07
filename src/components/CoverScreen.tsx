@@ -126,25 +126,20 @@ export const CoverScreen: React.FC<CoverScreenProps> = ({
             soundEngine.playPop();
             onStartStory();
           }}
-          className="w-full p-4 rounded-2xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-500/25 flex items-center justify-between transition-all active:scale-98 cursor-pointer group text-left"
+          className="w-full py-4 px-5 rounded-3xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-700 hover:to-orange-700 text-white shadow-md shadow-amber-500/25 flex items-center justify-between transition-all active:scale-98 cursor-pointer group text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0">
               🚂
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-black text-base sm:text-lg">Read & Collect Stamps</span>
-                <span className="text-[10px] bg-amber-400 text-amber-950 font-black px-2 py-0.5 rounded-full">
-                  Recommended
-                </span>
-              </div>
-              <p className="text-xs text-amber-100 font-medium mt-0.5">
-                Read the story + Earn 4 Emotion Stamps & Pass
-              </p>
+            <div className="flex items-center gap-2">
+              <span className="font-black text-lg sm:text-xl">Read &amp; Collect Stamps</span>
+              <span className="text-[11px] bg-amber-400 text-amber-950 font-black px-2.5 py-0.5 rounded-full shadow-2xs">
+                Recommended
+              </span>
             </div>
           </div>
-          <ArrowRight size={20} className="shrink-0 text-amber-200 group-hover:translate-x-1 transition-transform" />
+          <ArrowRight size={22} className="shrink-0 text-amber-200 group-hover:translate-x-1 transition-transform" />
         </button>
 
         {/* 2. Free Reading Mode: Read Only (Without Quizzes) */}
@@ -153,25 +148,17 @@ export const CoverScreen: React.FC<CoverScreenProps> = ({
             soundEngine.playPop();
             onStartFreeReading();
           }}
-          className="w-full p-3.5 rounded-2xl bg-white hover:bg-amber-50/80 text-slate-800 border-2 border-amber-300/80 shadow-xs flex items-center justify-between transition-all active:scale-98 cursor-pointer group text-left"
+          className="w-full py-3.5 px-5 rounded-3xl bg-white hover:bg-amber-50/80 text-slate-800 border-2 border-amber-300 shadow-xs flex items-center justify-between transition-all active:scale-98 cursor-pointer group text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
-              <BookOpen size={18} />
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+              <BookOpen size={20} />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-sm sm:text-base text-slate-900">Read Only</span>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full border border-slate-200">
-                  Story Only
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
-                Read from start to finish without quiz
-              </p>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-base sm:text-lg text-slate-900">Read Only</span>
             </div>
           </div>
-          <ArrowRight size={18} className="shrink-0 text-slate-400 group-hover:translate-x-1 transition-transform" />
+          <ArrowRight size={20} className="shrink-0 text-slate-400 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
     </div>
