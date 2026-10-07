@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Volume2, X, Star, BookmarkCheck } from 'lucide-react';
+import { Volume2, X, Star } from 'lucide-react';
 import { CORE_EMOTIONS, WORD_DICTIONARY } from '../data/storyData';
 import { CoreEmotionId } from '../types/story';
 import { pronunciationPlayer } from '../utils/pronunciation';
@@ -187,16 +187,6 @@ export const WordModal: React.FC<WordModalProps> = ({
                   {coreEmotion.exampleKorean}
                 </p>
               </div>
-
-              {/* Stamp Status Note */}
-              <div className="flex items-center gap-2 text-xs font-medium text-amber-800 bg-amber-100/50 p-2.5 rounded-xl border border-amber-200">
-                <BookmarkCheck size={16} className="text-amber-700 shrink-0" />
-                <span>
-                  {stampsCollected.includes(coreEmotion.id)
-                    ? `🎉 이미 '${coreEmotion.word}' Emotion Stamp를 획득했어요!`
-                    : `💡 이 장면 뒤에 나오는 감정 질문을 맞히면 '${coreEmotion.word}' 스탬프를 얻을 수 있어요!`}
-                </span>
-              </div>
             </>
           ) : (
             <div className="space-y-3">
@@ -218,7 +208,7 @@ export const WordModal: React.FC<WordModalProps> = ({
             onClick={handleClose}
             className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm transition-all shadow-xs active:scale-98 cursor-pointer"
           >
-            확인하고 이야기로 돌아가기
+            확인
           </button>
         </div>
       </div>
