@@ -1,0 +1,435 @@
+import React, { useEffect, useState, useRef } from 'react';
+import confetti from 'canvas-confetti';
+import { jsPDF } from 'jspdf';
+import { Award, RotateCcw, Home, Download, CheckCircle2, Loader2, Image as ImageIcon, CheckCircle, AlertTriangle, HelpCircle } from 'lucide-react';
+import { UserPassData, CoreEmotionId } from '../types/story';
+import { CORE_EMOTIONS, REFLECTION_SCENES } from '../data/storyData';
+import { soundEngine } from '../utils/soundEffects';
+import { generatePassCanvas } from '../utils/passCanvasGenerator';
+
+interface EmotionExpressPassProps {
+  passData: UserPassData;
+  onReadAgain: () => void;
+  onGoHome: () => void;
+}
+
+export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
+  passData,
+  onReadAgain,
+  onGoHome,
+}) => {
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const ticketRef = useRef<HTMLDivElement>(null);
+  const sceneImgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    try {
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#f59e0b', '#ea580c', '#10b981', '#6366f1', '#ec4899'],
+      });
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const selectedScene = REFLECTION_SCENES.find((s) => s.id === passData.selectedSceneId) || REFLECTION_SCENES[0];
+  const selectedEmotion = CORE_EMOTIONS[passData.selectedEmotionId] || CORE_EMOTIONS['excited'];
+  const stampKeys: CoreEmotionId[] = ['worried', 'anxious', 'relieved', 'excited'];
+
+  // Helper to safely render canvas: 100% immune to oklab CSS parser crashes
+  const captureTicketCanvas = async (): Promise<HTMLCanvasElement> => {
+    return await generatePassCanvas(passData, selectedScene, selectedEmotion, sceneImgRef.current);
+  };
+
+  // 1. High-fidelity PDF Download (Universal Mobile & Desktop Support)
+  const handleDownloadPdf = async () => {
+    if (isProcessing) return;
+    soundEngine.playPop();
+    setIsProcessing(true);
+
+    try {
+      const canvas = await captureTicketCanvas();
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+      // High-resolution A4 Landscape Certificate (297 x 210 mm)
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth(); // 297mm
+      const pageHeight = pdf.internal.pageSize.getHeight(); // 210mm
+      const margin = 10;
+      const pdfImageWidth = pageWidth - margin * 2; // 277mm
+      const pdfImageHeight = (canvas.height * pdfImageWidth) / canvas.width; // ~189mm
+
+      // Centered vertically
+      const offsetY = Math.max(margin, (pageHeight - pdfImageHeight) / 2);
+
+      pdf.addImage(imgData, 'JPEG', margin, offsetY, pdfImageWidth, pdfImageHeight);
+
+      // Trigger download compatible with iOS Safari, Chrome Mobile & Desktop
+      const fileName = `Emotion_Express_Pass_${passData.studentName.replace(/\s+/g, '_')}.pdf`;
+      const blob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 1000);
+
+      soundEngine.playCorrect();
+    } catch (err) {
+      console.error('PDF Download failed:', err);
+      // Native fallback
+      try {
+        const fallbackPdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        fallbackPdf.text('EMOTION EXPRESS PASS', 20, 30);
+        fallbackPdf.text(`Explorer: ${passData.studentName}`, 20, 45);
+        fallbackPdf.text(`Ticket No: ${passData.ticketNumber}`, 20, 55);
+        fallbackPdf.text(`Emotion: ${selectedEmotion.word}`, 20, 65);
+        fallbackPdf.save('Emotion_Express_Pass.pdf');
+      } catch {
+        window.print();
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 2. High-res Image (PNG) Download for Mobile Devices
+  const handleDownloadImage = async () => {
+    if (isProcessing) return;
+    soundEngine.playPop();
+    setIsProcessing(true);
+
+    try {
+      const canvas = await captureTicketCanvas();
+      const imgUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = imgUrl;
+      link.download = `Emotion_Express_Pass_${passData.studentName.replace(/\s+/g, '_')}.png`;
+      document.body.appendChild(link);
+      link.click();
+
+      setTimeout(() => {
+        document.body.removeChild(link);
+      }, 1000);
+
+      soundEngine.playCorrect();
+    } catch (err) {
+      console.error('Image download failed:', err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="max-w-xl mx-auto w-full px-4 py-6 space-y-6 animate-in fade-in zoom-in-95 duration-300">
+      {/* Banner */}
+      <div className="text-center space-y-1">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider shadow-xs">
+          <CheckCircle2 size={13} />
+          <span>Pass Issued Successfully!</span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          Emotion Express Pass
+        </h2>
+        <p className="text-xs sm:text-sm text-slate-600 font-medium">
+          축하합니다! 4개의 감정을 모두 마스터하고 나만의 패스를 완성했어요.
+        </p>
+      </div>
+
+      {/* The Printable & PDF-capturable Boarding Pass Card */}
+      <div
+        ref={ticketRef}
+        id="emotion-express-pass-ticket"
+        className="bg-gradient-to-br from-amber-50 via-white to-orange-50/70 rounded-3xl border-2 border-amber-300 shadow-xl overflow-hidden relative print:shadow-none print:border-black"
+      >
+        {/* Ticket Perforation Notch (Left & Right) */}
+        <div className="absolute top-[28%] -left-3 w-6 h-6 rounded-full bg-amber-50/40 border-r-2 border-amber-300" />
+        <div className="absolute top-[28%] -right-3 w-6 h-6 rounded-full bg-amber-50/40 border-l-2 border-amber-300" />
+
+        {/* Top Header Section of Ticket */}
+        <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 px-6 py-5 text-white flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="text-3xl">🚂</span>
+            <div>
+              <span className="text-[10px] tracking-widest uppercase text-amber-200 font-bold block">
+                Official Reading Certificate
+              </span>
+              <h3 className="text-lg sm:text-xl font-black tracking-tight">
+                EMOTION EXPRESS PASS
+              </h3>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[9px] uppercase tracking-wider text-amber-200 block">
+              Ticket No.
+            </span>
+            <span className="text-xs font-mono font-bold tracking-wider">
+              {passData.ticketNumber}
+            </span>
+          </div>
+        </div>
+
+        {/* Story & Learner Details */}
+        <div className="p-5 sm:p-6 space-y-5">
+          <div className="grid grid-cols-2 gap-3 pb-4 border-b border-dashed border-amber-200">
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                Story Title
+              </span>
+              <span className="text-sm sm:text-base font-black text-slate-900 block">
+                The Unread Message
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                Learner / Explorer
+              </span>
+              <span className="text-sm sm:text-base font-black text-slate-900">
+                {passData.studentName}
+              </span>
+              <span className="text-xs text-slate-500 font-medium block">
+                {passData.date}
+              </span>
+            </div>
+          </div>
+
+          {/* 4 Official Verified Emotion Stamps */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-amber-950 flex items-center gap-1">
+                <Award size={14} className="text-amber-600" />
+                <span>4대 감정 스탬프 (Verified Emotion Stamps)</span>
+              </span>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                All 4 Unlocked!
+              </span>
+            </div>
+
+            <div className="grid grid-cols-4 gap-2">
+              {stampKeys.map((key) => {
+                const info = CORE_EMOTIONS[key];
+                return (
+                  <div
+                    key={key}
+                    className="flex flex-col items-center p-2.5 rounded-2xl bg-white border border-amber-200 shadow-2xs text-center"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-white flex items-center justify-center text-xl shadow-xs">
+                      {info.stampIcon}
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-900 capitalize mt-1.5">
+                      {info.word}
+                    </span>
+                    <span className="text-[9px] text-amber-800 font-medium">
+                      {info.koreanMeaning.split(',')[0]}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Selected Memorable Scene & Emotional Connection (Clean: No artificial quote) */}
+          <div className="pt-2 border-t border-dashed border-amber-200 grid sm:grid-cols-5 gap-4 items-center">
+            {/* Scene Thumbnail */}
+            <div className="sm:col-span-2 aspect-4/3 rounded-2xl overflow-hidden bg-amber-100 border border-amber-200 relative shadow-2xs">
+              <img
+                ref={sceneImgRef}
+                src={selectedScene.image}
+                alt={selectedScene.title}
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-1 left-1 bg-slate-900/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-md">
+                Page {selectedScene.pageNumber}
+              </div>
+            </div>
+
+            {/* Reflection Content */}
+            <div className="sm:col-span-3 space-y-2.5 text-left">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                  Memorable Scene
+                </span>
+                <p className="text-sm sm:text-base font-bold text-slate-900">
+                  {selectedScene.koreanTitle}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {selectedScene.title}
+                </p>
+              </div>
+
+              <div className="pt-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider mb-1">
+                  My Feeling:
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-white shadow-2xs">
+                  <span>{selectedEmotion.stampIcon}</span>
+                  <span className="capitalize">{selectedEmotion.word}</span>
+                  <span>({selectedEmotion.koreanMeaning.split(',')[0]})</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Mission Quiz Review Report (문제 풀이 결과 및 틀린 문제 복습) */}
+      {passData.quizAttempts && passData.quizAttempts.length > 0 && (
+        <div className="w-full bg-white rounded-3xl border border-amber-200/90 p-4 sm:p-5 shadow-sm space-y-3.5 text-left print:hidden">
+          <div className="flex items-center justify-between border-b border-amber-100 pb-2.5">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">📝</span>
+              <div>
+                <h4 className="text-sm sm:text-base font-black text-slate-900">
+                  미션 이해 문제 결과 분석
+                </h4>
+                <p className="text-[11px] text-slate-500">
+                  내가 푼 4대 감정 미션의 정답 및 오답 기록을 확인해 보세요.
+                </p>
+              </div>
+            </div>
+
+            {/* Quick summary badge */}
+            {(() => {
+              const wrongCount = passData.quizAttempts.filter((a) => !a.firstTryCorrect).length;
+              return wrongCount === 0 ? (
+                <span className="text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <CheckCircle size={13} className="text-emerald-600" />
+                  <span>모든 문제 첫 시도 완벽 정답! ⭐</span>
+                </span>
+              ) : (
+                <span className="text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <AlertTriangle size={13} className="text-amber-600" />
+                  <span>{wrongCount}개 문제 재도전 후 통과</span>
+                </span>
+              );
+            })()}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {passData.quizAttempts.map((attempt) => {
+              const emotionInfo = CORE_EMOTIONS[attempt.coreEmotionId];
+              const wasPerfect = attempt.firstTryCorrect;
+
+              return (
+                <div
+                  key={attempt.questionId}
+                  className={`p-3 rounded-2xl border text-xs transition-all ${
+                    wasPerfect
+                      ? 'bg-emerald-50/50 border-emerald-200 text-slate-800'
+                      : 'bg-rose-50/50 border-rose-200 text-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-bold text-[11px] text-slate-700 flex items-center gap-1">
+                      <span>{emotionInfo?.stampIcon}</span>
+                      <span>{attempt.stageTitle}</span>
+                    </span>
+
+                    {wasPerfect ? (
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                        <CheckCircle size={10} />
+                        <span>한 번에 정답</span>
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                        <AlertTriangle size={10} />
+                        <span>오답 기록 있음 ({attempt.attemptsCount}회 시도)</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="font-bold text-slate-900 leading-snug">
+                    {attempt.questionText}
+                  </p>
+                  <p className="text-[10px] text-slate-500 mt-0.5 mb-2">
+                    {attempt.questionKorean}
+                  </p>
+
+                  <div className="space-y-1 bg-white/90 p-2 rounded-xl border border-slate-100">
+                    <div className="flex items-center gap-1.5 text-[11px]">
+                      <span className="font-bold text-emerald-700 shrink-0">✔ 최종 정답:</span>
+                      <span className="font-semibold text-slate-800">{attempt.correctAnswer}</span>
+                    </div>
+
+                    {!wasPerfect && attempt.wrongAnswersChosen.length > 0 && (
+                      <div className="flex items-start gap-1.5 text-[11px] pt-0.5 border-t border-slate-100">
+                        <span className="font-bold text-rose-600 shrink-0">✘ 처음 고른 오답:</span>
+                        <span className="text-rose-900 font-medium line-through">
+                          {attempt.wrongAnswersChosen.join(', ')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Action Buttons Row */}
+      <div className="flex flex-wrap items-center justify-center gap-3 pt-2 print:hidden">
+        {/* Real PDF Download Button */}
+        <button
+          onClick={handleDownloadPdf}
+          disabled={isProcessing}
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm shadow-sm transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
+        >
+          {isProcessing ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <Download size={16} />
+          )}
+          <span>{isProcessing ? '저장 중...' : 'PDF 저장'}</span>
+        </button>
+
+        {/* Mobile-friendly Image Save Option */}
+        <button
+          onClick={handleDownloadImage}
+          disabled={isProcessing}
+          className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-orange-100 hover:bg-orange-200 text-orange-950 border border-orange-300 font-bold text-sm shadow-xs transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
+          title="갤러리 및 기기에 이미지로 저장"
+        >
+          <ImageIcon size={16} />
+          <span>이미지(PNG) 저장</span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundEngine.playPop();
+            onReadAgain();
+          }}
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white hover:bg-amber-50 text-slate-800 border border-slate-300 font-bold text-sm shadow-xs transition-transform active:scale-95 cursor-pointer"
+        >
+          <RotateCcw size={16} />
+          <span>다시 읽기</span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundEngine.playPop();
+            onGoHome();
+          }}
+          className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold text-sm transition-transform active:scale-95 cursor-pointer"
+        >
+          <Home size={16} />
+          <span>홈으로</span>
+        </button>
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,6 @@
+{
+  "name": "Emotion Express",
+  "description": "An interactive English picture book app for 6th graders to read 'The Unread Message', understand character emotions, and collect Emotion Stamps for their Emotion Express Pass.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

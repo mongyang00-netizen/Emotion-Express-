@@ -1,0 +1,176 @@
+{
+  "1": {
+    "audioUrl": "/audio/page_1.mp3",
+    "totalDuration": 6.34,
+    "sentenceTimings": [
+      {
+        "sentenceIndex": 0,
+        "text": "School was over.",
+        "startTime": 0,
+        "endTime": 1.13
+      },
+      {
+        "sentenceIndex": 1,
+        "text": "Leo sent a message to his best friend Max.",
+        "startTime": 1.13,
+        "endTime": 4.08
+      },
+      {
+        "sentenceIndex": 2,
+        "text": "Do you want to ride bikes today?",
+        "startTime": 4.08,
+        "endTime": 6.34
+      }
+    ]
+  },
+  "2": {
+    "audioUrl": "/audio/page_2.mp3",
+    "totalDuration": 8.45,
+    "sentenceTimings": [
+      {
+        "sentenceIndex": 0,
+        "text": "Two hours passed, but there was no reply.",
+        "startTime": 0,
+        "endTime": 3.4
+      },
+      {
+        "sentenceIndex": 1,
+        "text": "The message was unread.",
+        "startTime": 3.4,
+        "endTime": 5.3
+      },
+      {
+        "sentenceIndex": 2,
+        "text": "Leo sat on the bench and felt worried.",
+        "startTime": 5.3,
+        "endTime": 8.45
+      }
+    ]
+  },
+  "3": {
+    "audioUrl": "/audio/page_3.mp3",
+    "totalDuration": 8.86,
+    "sentenceTimings": [
+      {
+        "sentenceIndex": 0,
+        "text": "The next morning, Leo saw Max at school.",
+        "startTime": 0,
+        "endTime": 3.19
+      },
+      {
+        "sentenceIndex": 1,
+        "text": "Max was talking and laughing with other friends.",
+        "startTime": 3.19,
+        "endTime": 7.02
+      },
+      {
+        "sentenceIndex": 2,
+        "text": "He did not look at Leo.",
+        "startTime": 7.02,
+        "endTime": 8.86
+      }
+    ]
+  },
+  "4": {
+    "audioUrl": "/audio/page_4.mp3",
+    "totalDuration": 7.54,
+    "sentenceTimings": [
+      {
+        "sentenceIndex": 0,
+        "text": "Leo sat at his desk quietly.",
+        "startTime": 0,
+        "endTime": 2.18
+      },
+      {
+        "sentenceIndex": 1,
+        "text": "Is Max mad at me? he thought.",
+        "startTime": 2.18,
+        "endTime": 4.43
+      },
+      {
+        "sentenceIndex": 2,
+        "text": "Leo felt anxious about their friendship.",
+        "startTime": 4.43,
+        "endTime": 7.54
+      }
+    ]
+  },
+  "5": {
+    "audioUrl": "/audio/page_5.mp3",
+    "totalDuration": 7.37,
+    "sentenceTimings": [
+      {
+        "sentenceIndex": 0,
+        "text": "At lunch, Leo walked to Max.",
+        "startTime": 0,
+        "endTime": 2.49
+      },
+      {
+        "sentenceIndex": 1,
+        "text": "He asked softly, Max, did you see my message yesterday?",
+        "startTime": 2.49,
+        "endTime": 7.37
+      }
+    ]
+  },
+  "6": {
+    "audioUrl": "/audio/page_6.mp3",
+    "totalDuration": 10.1,
+    "sentenceTimings": [
+      {
+        "sentenceIndex": 0,
+        "text": "Max showed his phone.",
+        "startTime": 0,
+        "endTime": 1.89
+      },
+      {
+        "sentenceIndex": 1,
+        "text": "The screen was cracked and black!",
+        "startTime": 1.89,
+        "endTime": 4.87
+      },
+      {
+        "sentenceIndex": 2,
+        "text": "I dropped it during soccer, said Max.",
+        "startTime": 4.87,
+        "endTime": 8.21
+      },
+      {
+        "sentenceIndex": 3,
+        "text": "Leo felt so relieved.",
+        "startTime": 8.21,
+        "endTime": 10.1
+      }
+    ]
+  },
+  "7": {
+    "audioUrl": "/audio/page_7.mp3",
+    "totalDuration": 7.78,
+    "sentenceTimings": [
+      {
+        "sentenceIndex": 0,
+        "text": "Max smiled.",
+        "startTime": 0,
+        "endTime": 0.94
+      },
+      {
+        "sentenceIndex": 1,
+        "text": "My dad can fix it on Saturday.",
+        "startTime": 0.94,
+        "endTime": 3.5
+      },
+      {
+        "sentenceIndex": 2,
+        "text": "Let us ride our bikes this weekend!",
+        "startTime": 3.5,
+        "endTime": 6.49
+      },
+      {
+        "sentenceIndex": 3,
+        "text": "Leo smiled too.",
+        "startTime": 6.49,
+        "endTime": 7.78
+      }
+    ]
+  }
+}
