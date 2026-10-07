@@ -2,8 +2,100 @@ import { UserPassData, CoreEmotionInfo, ReflectionScene, CoreEmotionId } from '.
 import { CORE_EMOTIONS } from '../data/storyData';
 
 /**
+ * Standalone, pure SVG vector definitions for emojis and icons.
+ * This completely avoids iOS Safari's WebKit limitation where system emoji fonts
+ * fail to rasterize to Canvas 2D context.
+ */
+const EMOJI_SVGS: Record<string, string> = {
+  train: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+    <rect x="8" y="24" width="48" height="26" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="2.5"/>
+    <path d="M8 36 h48 v14 H8 Z" fill="#f59e0b"/>
+    <path d="M48 24 h8 c2 0 4 2 4 4 v18 c0 4 -3 8 -8 8 h-4 Z" fill="#ea580c"/>
+    <rect x="42" y="12" width="8" height="12" rx="2" fill="#78350f"/>
+    <ellipse cx="46" cy="12" rx="6" ry="2.5" fill="#f59e0b"/>
+    <circle cx="34" cy="8" r="4" fill="#ffffff" opacity="0.9"/>
+    <circle cx="26" cy="6" r="3" fill="#ffffff" opacity="0.7"/>
+    <rect x="14" y="27" width="10" height="9" rx="2" fill="#38bdf8" stroke="#0369a1" stroke-width="1.5"/>
+    <rect x="28" y="27" width="10" height="9" rx="2" fill="#38bdf8" stroke="#0369a1" stroke-width="1.5"/>
+    <circle cx="58" cy="38" r="3.5" fill="#fef08a" stroke="#d97706" stroke-width="1.5"/>
+    <circle cx="18" cy="50" r="7" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+    <circle cx="18" cy="50" r="3" fill="#94a3b8"/>
+    <circle cx="34" cy="50" r="7" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+    <circle cx="34" cy="50" r="3" fill="#94a3b8"/>
+    <circle cx="50" cy="50" r="7" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+    <circle cx="50" cy="50" r="3" fill="#94a3b8"/>
+    <rect x="18" y="48" width="32" height="3.5" rx="1.5" fill="#e2e8f0" stroke="#475569" stroke-width="1"/>
+  </svg>`,
+
+  worried: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+    <circle cx="32" cy="32" r="28" fill="#fbbf24" stroke="#d97706" stroke-width="2.5"/>
+    <path d="M16 20 Q 22 17 26 21" fill="none" stroke="#78350f" stroke-width="3" stroke-linecap="round"/>
+    <path d="M48 20 Q 42 17 38 21" fill="none" stroke="#78350f" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="22" cy="27" rx="3.5" ry="4.5" fill="#292524"/>
+    <circle cx="21" cy="25.5" r="1.3" fill="#ffffff"/>
+    <ellipse cx="42" cy="27" rx="3.5" ry="4.5" fill="#292524"/>
+    <circle cx="41" cy="25.5" r="1.3" fill="#ffffff"/>
+    <path d="M22 45 Q 32 37 42 45" fill="none" stroke="#78350f" stroke-width="3.5" stroke-linecap="round"/>
+  </svg>`,
+
+  anxious: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+    <circle cx="32" cy="32" r="28" fill="#fbbf24" stroke="#d97706" stroke-width="2.5"/>
+    <path d="M16 12 C 14 15, 12 18, 12 21 C 12 24, 15 26, 17 26 C 20 26, 22 24, 22 21 C 22 18, 18 15, 16 12 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5"/>
+    <circle cx="15.5" cy="20" r="1.2" fill="#ffffff"/>
+    <path d="M19 22 Q 24 18 28 23" fill="none" stroke="#78350f" stroke-width="3" stroke-linecap="round"/>
+    <path d="M45 22 Q 40 18 36 23" fill="none" stroke="#78350f" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="24" cy="28" rx="4" ry="5" fill="#292524"/>
+    <circle cx="23" cy="26" r="1.5" fill="#ffffff"/>
+    <ellipse cx="40" cy="28" rx="4" ry="5" fill="#292524"/>
+    <circle cx="39" cy="26" r="1.5" fill="#ffffff"/>
+    <path d="M22 42 Q 32 38 42 42 Q 32 49 22 42 Z" fill="#78350f" stroke="#78350f" stroke-width="1"/>
+    <path d="M24 42 Q 32 40 40 42" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
+
+  relieved: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+    <circle cx="32" cy="32" r="28" fill="#fbbf24" stroke="#ca8a04" stroke-width="2.5"/>
+    <path d="M18 20 Q 23 17 28 20" fill="none" stroke="#854d0e" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M46 20 Q 41 17 36 20" fill="none" stroke="#854d0e" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M18 28 Q 23 23 28 28" fill="none" stroke="#713f12" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M46 28 Q 41 23 36 28" fill="none" stroke="#713f12" stroke-width="3.2" stroke-linecap="round"/>
+    <ellipse cx="16" cy="35" rx="4.5" ry="2.5" fill="#f43f5e" opacity="0.45"/>
+    <ellipse cx="48" cy="35" rx="4.5" ry="2.5" fill="#f43f5e" opacity="0.45"/>
+    <path d="M24 38 Q 32 46 40 38" fill="none" stroke="#713f12" stroke-width="3.2" stroke-linecap="round"/>
+  </svg>`,
+
+  excited: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+    <circle cx="32" cy="32" r="28" fill="#fbbf24" stroke="#c2410c" stroke-width="2.5"/>
+    <polygon points="23,17 25,23 31,23 26,27 28,33 23,29 18,33 20,27 15,23 21,23" fill="#f59e0b" stroke="#78350f" stroke-width="1.2"/>
+    <polygon points="23,19 24.5,23.5 28.5,23.5 25,26.5 26.5,31 23,28 19.5,31 21,26.5 17.5,23.5 21.5,23.5" fill="#fef08a"/>
+    <polygon points="41,17 43,23 49,23 44,27 46,33 41,29 36,33 38,27 33,23 39,23" fill="#f59e0b" stroke="#78350f" stroke-width="1.2"/>
+    <polygon points="41,19 42.5,23.5 46.5,23.5 43,26.5 44.5,31 41,28 37.5,31 39,26.5 35.5,23.5 39.5,23.5" fill="#fef08a"/>
+    <path d="M20 38 Q 32 38 44 38 C 44 48, 38 52, 32 52 C 26 52, 20 48, 20 38 Z" fill="#78350f" stroke="#78350f" stroke-width="1"/>
+    <path d="M21 38 Q 32 38 43 38 C 43 41, 40 43, 32 43 C 24 43, 21 41, 21 38 Z" fill="#ffffff"/>
+    <path d="M26 48 C 28 45, 36 45, 38 48 C 36 51, 28 51, 26 48 Z" fill="#f43f5e"/>
+  </svg>`,
+};
+
+/**
+ * Loads an inline SVG into an HTMLImageElement safely
+ */
+function loadSvgElement(svgString: string): Promise<HTMLImageElement> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const encoded = encodeURIComponent(svgString.trim());
+    img.src = `data:image/svg+xml;charset=utf-8,${encoded}`;
+    if (img.complete && img.naturalWidth > 0) {
+      resolve(img);
+      return;
+    }
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(img);
+    setTimeout(() => resolve(img), 400);
+  });
+}
+
+/**
  * High-resolution Canvas 2D Boarding Pass Generator.
- * 100% offline, zero remote stylesheet access, immune to CORS/SecurityError.
+ * 100% offline, zero remote stylesheet access, immune to CORS/SecurityError and iOS emoji font missing glyphs.
  * Produces crisp 2x resolution certificate matching the on-screen card layout.
  */
 export async function generatePassCanvas(
@@ -12,6 +104,31 @@ export async function generatePassCanvas(
   selectedEmotion: CoreEmotionInfo,
   sceneImageElement?: HTMLImageElement | null
 ): Promise<HTMLCanvasElement> {
+  // Ensure document fonts are loaded if available
+  if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+    try {
+      await document.fonts.ready;
+    } catch {
+      // ignore
+    }
+  }
+
+  // Pre-load all standalone vector SVGs for emojis
+  const [trainImg, worriedImg, anxiousImg, relievedImg, excitedImg] = await Promise.all([
+    loadSvgElement(EMOJI_SVGS.train),
+    loadSvgElement(EMOJI_SVGS.worried),
+    loadSvgElement(EMOJI_SVGS.anxious),
+    loadSvgElement(EMOJI_SVGS.relieved),
+    loadSvgElement(EMOJI_SVGS.excited),
+  ]);
+
+  const emotionSvgMap: Record<string, HTMLImageElement> = {
+    worried: worriedImg,
+    anxious: anxiousImg,
+    relieved: relievedImg,
+    excited: excitedImg,
+  };
+
   const canvas = document.createElement('canvas');
   // High-resolution canvas matching the on-screen vertical proportion (900 x 920)
   const W = 900;
@@ -96,9 +213,10 @@ export async function generatePassCanvas(
   ctx.fillStyle = headerGrad;
   ctx.fillRect(margin, margin, cardW, headerH);
 
-  // Train icon
-  ctx.font = '36px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-  ctx.fillText('🚂', margin + 28, margin + 62);
+  // Vector Train icon (drawn as vector SVG, zero font dependency)
+  if (trainImg && trainImg.naturalWidth > 0) {
+    ctx.drawImage(trainImg, margin + 24, margin + 26, 48, 48);
+  }
 
   // Header Subtitle & Title
   ctx.fillStyle = '#fef3c7';
@@ -217,16 +335,16 @@ export async function generatePassCanvas(
     ctx.arc(badgeCenterX, badgeCenterY, badgeSize / 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Emoji icon (centered inside circle)
-    ctx.font = '22px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(info.stampIcon, badgeCenterX, badgeCenterY + 1);
-    ctx.textBaseline = 'alphabetic';
+    // Standalone Vector Emoji Icon (centered inside circle badge)
+    const svgIcon = emotionSvgMap[key];
+    if (svgIcon && svgIcon.naturalWidth > 0) {
+      ctx.drawImage(svgIcon, badgeCenterX - 15, badgeCenterY - 15, 30, 30);
+    }
 
     // Word text
     ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center';
     ctx.fillText(info.word, badgeCenterX, sY + 74);
 
     // Korean meaning
@@ -327,21 +445,19 @@ export async function generatePassCanvas(
   ctx.fillStyle = pillGrad;
   roundRect(reflTextX, feelingY + 12, Math.min(reflW, 340), 48, 24, true, false);
 
-  // Emoji in pill badge
-  ctx.font = '22px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(selectedEmotion.stampIcon, reflTextX + 28, feelingY + 36);
-  ctx.textBaseline = 'alphabetic';
-  ctx.textAlign = 'left';
+  // Standalone Vector Emoji in pill badge
+  const selSvgIcon = emotionSvgMap[selectedEmotion.id] || emotionSvgMap['excited'];
+  if (selSvgIcon && selSvgIcon.naturalWidth > 0) {
+    ctx.drawImage(selSvgIcon, reflTextX + 14, feelingY + 22, 28, 28);
+  }
 
   // Word in pill badge
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText(selectedEmotion.word.toUpperCase(), reflTextX + 54, feelingY + 42);
+  ctx.fillText(selectedEmotion.word.toUpperCase(), reflTextX + 50, feelingY + 42);
 
   ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText(`(${selectedEmotion.koreanMeaning.split(',')[0]})`, reflTextX + 175, feelingY + 41);
+  ctx.fillText(`(${selectedEmotion.koreanMeaning.split(',')[0]})`, reflTextX + 165, feelingY + 41);
 
   // Verified Stamp ribbon at bottom right
   ctx.textAlign = 'right';
@@ -352,4 +468,3 @@ export async function generatePassCanvas(
 
   return canvas;
 }
-
