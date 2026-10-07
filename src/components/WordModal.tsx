@@ -134,6 +134,22 @@ export const WordModal: React.FC<WordModalProps> = ({
         <div className="p-5 space-y-4 overflow-y-auto">
           {coreEmotion ? (
             <>
+              {/* Emotion Illustrative Picture Card (예문 및 감정 이해를 돕는 그림) */}
+              {coreEmotion.image && (
+                <div className="relative w-full aspect-16/9 rounded-2xl overflow-hidden bg-amber-100 border-2 border-amber-300 shadow-sm group">
+                  <img
+                    src={coreEmotion.image}
+                    alt={coreEmotion.imageAlt || `${coreEmotion.word} illustration`}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                  />
+                  <div className="absolute top-2.5 left-2.5 bg-slate-900/80 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
+                    <span className="text-sm">{coreEmotion.stampIcon}</span>
+                    <span>감정 이해 힌트 그림</span>
+                  </div>
+                </div>
+              )}
+
               {/* Emotion Deep Dive Card */}
               <div className="bg-amber-50/60 rounded-2xl p-4 border border-amber-200 space-y-2.5">
                 <div className="flex items-center gap-2">
@@ -142,7 +158,10 @@ export const WordModal: React.FC<WordModalProps> = ({
                     언제 이 감정을 느끼나요?
                   </span>
                 </div>
-                <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                <p
+                  className="text-xs text-slate-700 leading-relaxed font-medium"
+                  style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}
+                >
                   {coreEmotion.explanation}
                 </p>
               </div>

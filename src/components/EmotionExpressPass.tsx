@@ -72,20 +72,55 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
 
       pdf.addImage(imgData, 'JPEG', margin, offsetY, pdfImageWidth, Math.min(pdfImageHeight, pageHeight - margin * 2));
 
-      // Trigger download compatible with iOS Safari, Chrome Mobile & Desktop
-      const fileName = `Emotion_Express_Pass_${passData.studentName.replace(/\s+/g, '_')}.pdf`;
-      const blob = pdf.output('blob');
+      // Clean ASCII-safe fallback filename with Korean support
+      const safeName = passData.studentName.replace(/[/\\?%*:|"<>]/g, '').trim() || 'Student';
+      const fileName = `Emotion_Express_Pass_${safeName}.pdf`;
+
+      // Extract proper binary ArrayBuffer to guarantee complete, uncorrupted PDF stream
+      const arrayBuffer = pdf.output('arraybuffer');
+      const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+
+      // If on mobile and Web Share API is available, share directly for native Android/iOS file saving
+      if (typeof navigator !== 'undefined' && 'canShare' in navigator && 'share' in navigator) {
+        try {
+          const file = new File([blob], fileName, { type: 'application/pdf', lastModified: Date.now() });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'Emotion Express Pass',
+              text: 'Emotion Express Pass 완료 인증서',
+            });
+            soundEngine.playCorrect();
+            return;
+          }
+        } catch (shareErr) {
+          // If user cancelled the share dialog or device threw, proceed to direct download fallback
+          if ((shareErr as Error).name === 'AbortError') {
+            return;
+          }
+        }
+      }
+
+      // Universal Android & Desktop direct download using persistent Blob URL
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
       link.download = fileName;
+      link.rel = 'noopener';
       document.body.appendChild(link);
       link.click();
 
+      // CRITICAL FOR ANDROID: Keep blobUrl active for 60 seconds so Android Download Manager completes asynchronously without 0-byte truncation
       setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
-      }, 1000);
+        try {
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+          URL.revokeObjectURL(blobUrl);
+        } catch {
+          // ignore
+        }
+      }, 60000);
 
       soundEngine.playCorrect();
     } catch (err) {
@@ -113,18 +148,50 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
 
     try {
       const canvas = await captureTicketCanvas();
-      const imgUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.href = imgUrl;
-      link.download = `Emotion_Express_Pass_${passData.studentName.replace(/\s+/g, '_')}.png`;
-      document.body.appendChild(link);
-      link.click();
+      const safeName = passData.studentName.replace(/[/\\?%*:|"<>]/g, '').trim() || 'Student';
+      const fileName = `Emotion_Express_Pass_${safeName}.png`;
 
-      setTimeout(() => {
-        document.body.removeChild(link);
-      }, 1000);
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
 
-      soundEngine.playCorrect();
+        // Mobile Web Share API option
+        if (typeof navigator !== 'undefined' && 'canShare' in navigator && 'share' in navigator) {
+          try {
+            const file = new File([blob], fileName, { type: 'image/png', lastModified: Date.now() });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: 'Emotion Express Pass Image',
+              });
+              soundEngine.playCorrect();
+              return;
+            }
+          } catch (shareErr) {
+            if ((shareErr as Error).name === 'AbortError') return;
+          }
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = fileName;
+        link.rel = 'noopener';
+        document.body.appendChild(link);
+        link.click();
+
+        setTimeout(() => {
+          try {
+            if (document.body.contains(link)) {
+              document.body.removeChild(link);
+            }
+            URL.revokeObjectURL(blobUrl);
+          } catch {
+            // ignore
+          }
+        }, 60000);
+
+        soundEngine.playCorrect();
+      }, 'image/png');
     } catch (err) {
       console.error('Image download failed:', err);
     } finally {

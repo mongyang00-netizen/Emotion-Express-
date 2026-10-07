@@ -12,6 +12,7 @@ interface HeaderProps {
   soundEnabled: boolean;
   onToggleSound: () => void;
   readingMode?: ReadingMode;
+  onEmotionClick?: (emotion: CoreEmotionId) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   soundEnabled,
   onToggleSound,
   readingMode = 'mission',
+  onEmotionClick,
 }) => {
   const isStoryPage = currentPage >= 1 && currentPage <= totalPages;
   const stampKeys: CoreEmotionId[] = ['worried', 'anxious', 'relieved', 'excited'];
@@ -72,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Stamps Collected Tracker */}
           <div
             className="flex items-center gap-1 bg-amber-100/80 border border-amber-200 px-2 py-1 rounded-full text-xs"
-            title={`모은 감정 스탬프: ${stamps.length} / 4개`}
+            title={`모은 감정 스탬프: ${stamps.length} / 4개 (스탬프를 탭하면 뜻과 그림을 볼 수 있어요)`}
           >
             <span className="text-amber-900 font-bold hidden sm:inline">Stamps:</span>
             <div className="flex items-center gap-1">
@@ -80,17 +82,24 @@ export const Header: React.FC<HeaderProps> = ({
                 const isCollected = stamps.includes(key);
                 const info = CORE_EMOTIONS[key];
                 return (
-                  <span
+                  <button
                     key={key}
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-xs transition-all duration-300 ${
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playPop();
+                      if (onEmotionClick) {
+                        onEmotionClick(key);
+                      }
+                    }}
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-xs transition-all duration-300 cursor-pointer hover:scale-120 active:scale-95 ${
                       isCollected
                         ? 'bg-amber-500 text-white shadow-xs scale-105'
-                        : 'bg-amber-200/60 text-amber-400 opacity-60'
+                        : 'bg-amber-200/60 text-amber-500 hover:bg-amber-200'
                     }`}
-                    title={isCollected ? `${info.word} (${info.koreanMeaning}) 스탬프 획득!` : `${info.word} 미획득`}
+                    title={`${info.word} (${info.koreanMeaning}) - 탭해서 그림과 뜻 보기`}
                   >
                     {isCollected ? info.stampIcon : '○'}
-                  </span>
+                  </button>
                 );
               })}
             </div>

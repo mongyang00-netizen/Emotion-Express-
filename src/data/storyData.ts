@@ -11,6 +11,12 @@ import page6Img from '../assets/images/scene_p6_pure_1791269604117.jpg';
 import page7Img from '../assets/images/scene_p7_pure_1791269614576.jpg';
 import page8Img from '../assets/images/scene_friends_walking_1791263292982.jpg';
 
+// Import dedicated bespoke emotion vocabulary illustrations (consistent Leo Asian & Max Caucasian characters)
+import emotionWorriedImg from '../assets/images/leo_asian_worried_1791365138299.jpg';
+import emotionAnxiousImg from '../assets/images/leo_asian_anxious_1791365160469.jpg';
+import emotionRelievedImg from '../assets/images/leo_max_relieved_1791365176856.jpg';
+import emotionExcitedImg from '../assets/images/leo_max_excited_1791365222029.jpg';
+
 export const STORY_IMAGES = {
   cover: coverImg,
   page1: page1Img,
@@ -21,6 +27,10 @@ export const STORY_IMAGES = {
   page6: page6Img,
   page7: page7Img,
   page8: page8Img,
+  emotionWorried: emotionWorriedImg,
+  emotionAnxious: emotionAnxiousImg,
+  emotionRelieved: emotionRelievedImg,
+  emotionExcited: emotionExcitedImg,
 };
 
 export const CORE_EMOTIONS: Record<string, CoreEmotionInfo> = {
@@ -36,6 +46,8 @@ export const CORE_EMOTIONS: Record<string, CoreEmotionInfo> = {
     badgeBg: 'bg-amber-100 text-amber-900 border-amber-300',
     stampIcon: '😟',
     stampColor: 'from-amber-400 to-amber-600',
+    image: emotionWorriedImg,
+    imageAlt: 'Boy looking worriedly at smartphone waiting for reply',
   },
   anxious: {
     id: 'anxious',
@@ -49,6 +61,8 @@ export const CORE_EMOTIONS: Record<string, CoreEmotionInfo> = {
     badgeBg: 'bg-purple-100 text-purple-900 border-purple-300',
     stampIcon: '😰',
     stampColor: 'from-purple-400 to-purple-600',
+    image: emotionAnxiousImg,
+    imageAlt: 'Student feeling anxious before big school running race',
   },
   relieved: {
     id: 'relieved',
@@ -62,6 +76,8 @@ export const CORE_EMOTIONS: Record<string, CoreEmotionInfo> = {
     badgeBg: 'bg-emerald-100 text-emerald-900 border-emerald-300',
     stampIcon: '😌',
     stampColor: 'from-emerald-400 to-emerald-600',
+    image: emotionRelievedImg,
+    imageAlt: 'Boy feeling relieved seeing friend broken phone',
   },
   excited: {
     id: 'excited',
@@ -75,6 +91,8 @@ export const CORE_EMOTIONS: Record<string, CoreEmotionInfo> = {
     badgeBg: 'bg-orange-100 text-orange-900 border-orange-300',
     stampIcon: '🤩',
     stampColor: 'from-orange-400 to-amber-500',
+    image: emotionExcitedImg,
+    imageAlt: 'Two friends excited riding bicycles together',
   },
 };
 

@@ -13,6 +13,9 @@ export interface CoreEmotionInfo {
   badgeBg: string;
   stampIcon: string;
   stampColor: string;
+  image?: string;
+  imageAlt?: string;
+  imageCaption?: string;
 }
 
 export interface StoryPageData {

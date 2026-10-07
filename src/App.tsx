@@ -275,6 +275,7 @@ export default function App() {
         soundEnabled={soundEnabled}
         onToggleSound={toggleSound}
         readingMode={readingMode}
+        onEmotionClick={(emotion) => setSelectedWord(emotion)}
       />
 
       {/* Main Content Area */}
@@ -285,6 +286,7 @@ export default function App() {
             stamps={stamps}
             onStartStory={handleStartStory}
             onStartFreeReading={handleStartFreeReading}
+            onEmotionClick={(emotion) => setSelectedWord(emotion)}
           />
         )}
 

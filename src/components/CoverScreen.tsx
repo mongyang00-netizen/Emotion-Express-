@@ -8,12 +8,14 @@ interface CoverScreenProps {
   stamps: CoreEmotionId[];
   onStartStory: () => void;
   onStartFreeReading: () => void;
+  onEmotionClick?: (emotion: CoreEmotionId) => void;
 }
 
 export const CoverScreen: React.FC<CoverScreenProps> = ({
   stamps,
   onStartStory,
   onStartFreeReading,
+  onEmotionClick,
 }) => {
   const stampKeys: CoreEmotionId[] = ['worried', 'anxious', 'relieved', 'excited'];
 
@@ -97,23 +99,36 @@ export const CoverScreen: React.FC<CoverScreenProps> = ({
 
       {/* 4 Core Emotions Preview - Balanced 2x2 on Mobile, 4-col on Desktop */}
       <div className="w-full bg-amber-50/80 p-3 sm:p-4 rounded-2xl border border-amber-200/90 text-left space-y-2">
-        <span className="text-xs font-bold text-amber-950 block">4대 핵심 감정 어휘 (Core Emotions)</span>
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-amber-950 block">4대 핵심 감정 어휘 (Core Emotions)</span>
+          <span className="text-[10px] text-amber-800 font-semibold">💡 탭해서 그림·뜻 보기</span>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {stampKeys.map((k) => (
-            <div
+            <button
               key={k}
-              className="bg-white p-2.5 rounded-xl border border-amber-200/80 flex items-center gap-2 shadow-2xs"
+              type="button"
+              onClick={() => {
+                soundEngine.playPop();
+                if (onEmotionClick) {
+                  onEmotionClick(k);
+                }
+              }}
+              className="bg-white hover:bg-amber-100/70 active:scale-95 transition-all p-2.5 rounded-xl border border-amber-200/90 flex items-center gap-2 shadow-2xs text-left cursor-pointer group"
+              title={`${CORE_EMOTIONS[k].word} 단어 뜻과 그림 보기`}
             >
-              <span className="text-xl shrink-0">{CORE_EMOTIONS[k].stampIcon}</span>
+              <span className="text-xl shrink-0 group-hover:scale-110 transition-transform">
+                {CORE_EMOTIONS[k].stampIcon}
+              </span>
               <div className="leading-tight">
-                <span className="text-xs font-bold text-slate-800 capitalize block">
+                <span className="text-xs font-bold text-slate-800 capitalize block group-hover:text-amber-900">
                   {CORE_EMOTIONS[k].word}
                 </span>
                 <span className="text-[10px] text-amber-700 font-medium">
                   {CORE_EMOTIONS[k].koreanMeaning.split(',')[0]}
                 </span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

@@ -78,7 +78,7 @@ export const ReflectionScreen: React.FC<ReflectionScreenProps> = ({
               1
             </span>
             <h3 className="text-base sm:text-lg font-bold text-slate-900">
-              가장 기억에 남는 장면을 골라보세요
+              가장 기억에 남는 장면은 무엇인가요?
             </h3>
           </div>
           <span className="text-xs text-amber-700 font-semibold">1개 선택</span>
