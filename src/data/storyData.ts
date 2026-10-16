@@ -3,7 +3,7 @@ import { CoreEmotionInfo, QuestionData, ReflectionScene, StoryPageData } from '.
 // Import distinct images for each page
 import coverImg from '../assets/images/cover_textless_bench_1791267419615.jpg';
 import page1Img from '../assets/images/scene_p1_pure_1791269592909.jpg';
-import page2Img from '../assets/images/scene_waiting_bench_1791263257068.jpg';
+import page2Img from '../assets/images/scene_p2_solid_navy_1792115361990.jpg';
 import page3Img from '../assets/images/scene_page3_hallway_1791267064516.jpg';
 import page4Img from '../assets/images/scene_classroom_anxious_1791265349272.jpg';
 import page5Img from '../assets/images/scene_page5_lunch_1791267089681.jpg';
