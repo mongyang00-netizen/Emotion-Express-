@@ -130,14 +130,19 @@ export async function generatePassCanvas(
   };
 
   const canvas = document.createElement('canvas');
-  // High-resolution canvas matching the on-screen vertical proportion (900 x 920)
+  // High-DPI 2.5x scale multiplier for 300 DPI print-ready high-resolution PDF & PNG export (2250 x 2300)
+  const SCALE = 2.5;
   const W = 900;
   const H = 920;
-  canvas.width = W;
-  canvas.height = H;
+  canvas.width = W * SCALE;
+  canvas.height = H * SCALE;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Could not get canvas 2D context');
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.scale(SCALE, SCALE);
 
   // Helper for rounded rectangles
   const roundRect = (
@@ -377,20 +382,27 @@ export async function generatePassCanvas(
   ctx.lineWidth = 2;
   roundRect(sceneX, sceneAreaY, sceneThumbW, sceneThumbH, 18, true, true);
 
-  // Draw scene image onto canvas
+  // Draw full high-resolution scene image onto canvas
   try {
-    let imgToDraw: CanvasImageSource | null = sceneImageElement || null;
-    if (!imgToDraw || !(imgToDraw as HTMLImageElement).complete) {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = selectedScene.image;
+    let imgToDraw: HTMLImageElement | null = null;
+    if (sceneImageElement && sceneImageElement.complete && sceneImageElement.naturalWidth > 0) {
+      imgToDraw = sceneImageElement;
+    } else {
+      const fullResImg = new Image();
+      fullResImg.src = selectedScene.image;
       await new Promise<void>((resolve) => {
-        img.onload = () => resolve();
-        img.onerror = () => resolve();
-        setTimeout(resolve, 600);
+        if (fullResImg.complete && fullResImg.naturalWidth > 0) {
+          resolve();
+        } else {
+          fullResImg.onload = () => resolve();
+          fullResImg.onerror = () => resolve();
+          setTimeout(resolve, 800);
+        }
       });
-      if (img.complete && img.naturalWidth > 0) {
-        imgToDraw = img;
+      if (fullResImg.complete && fullResImg.naturalWidth > 0) {
+        imgToDraw = fullResImg;
+      } else if (sceneImageElement) {
+        imgToDraw = sceneImageElement;
       }
     }
 
@@ -399,7 +411,32 @@ export async function generatePassCanvas(
       ctx.beginPath();
       roundRect(sceneX + 5, sceneAreaY + 5, sceneThumbW - 10, sceneThumbH - 10, 14, false, false);
       ctx.clip();
-      ctx.drawImage(imgToDraw, sceneX + 5, sceneAreaY + 5, sceneThumbW - 10, sceneThumbH - 10);
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      // Object-fit: cover with center crop to preserve exact aspect ratio without distortion or stretching
+      const naturalW = imgToDraw.naturalWidth || 800;
+      const naturalH = imgToDraw.naturalHeight || 600;
+      const targetW = sceneThumbW - 10;
+      const targetH = sceneThumbH - 10;
+
+      const imgAspect = naturalW / naturalH;
+      const targetAspect = targetW / targetH;
+      let sx = 0;
+      let sy = 0;
+      let sw = naturalW;
+      let sh = naturalH;
+
+      if (imgAspect > targetAspect) {
+        sw = naturalH * targetAspect;
+        sx = (naturalW - sw) / 2;
+      } else {
+        sh = naturalW / targetAspect;
+        sy = (naturalH - sh) / 2;
+      }
+
+      ctx.drawImage(imgToDraw, sx, sy, sw, sh, sceneX + 5, sceneAreaY + 5, targetW, targetH);
       ctx.restore();
 
       // Page tag on image

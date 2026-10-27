@@ -9,7 +9,7 @@ import page4Img from '../assets/images/scene_classroom_anxious_1791265349272.jpg
 import page5Img from '../assets/images/scene_page5_lunch_1791267089681.jpg';
 import page6Img from '../assets/images/scene_p6_pure_1791269604117.jpg';
 import page7Img from '../assets/images/scene_p7_pure_1791269614576.jpg';
-import page8Img from '../assets/images/scene_friends_walking_1791263292982.jpg';
+import page8Img from '../assets/images/p8_friends_walk_v3_1793116964082.jpg';
 
 // Import dedicated bespoke emotion vocabulary illustrations (consistent Leo Asian & Max Caucasian characters)
 import emotionWorriedImg from '../assets/images/leo_asian_worried_1791365138299.jpg';

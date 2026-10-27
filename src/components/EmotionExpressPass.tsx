@@ -52,7 +52,7 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
 
     try {
       const canvas = await captureTicketCanvas();
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgData = canvas.toDataURL('image/png');
 
       // High-resolution A4 Certificate
       const isLandscape = canvas.width > canvas.height;
@@ -70,7 +70,7 @@ export const EmotionExpressPass: React.FC<EmotionExpressPassProps> = ({
 
       const offsetY = Math.max(margin, (pageHeight - pdfImageHeight) / 2);
 
-      pdf.addImage(imgData, 'JPEG', margin, offsetY, pdfImageWidth, Math.min(pdfImageHeight, pageHeight - margin * 2));
+      pdf.addImage(imgData, 'PNG', margin, offsetY, pdfImageWidth, Math.min(pdfImageHeight, pageHeight - margin * 2));
 
       // Clean ASCII-safe fallback filename with Korean support
       const safeName = passData.studentName.replace(/[/\\?%*:|"<>]/g, '').trim() || 'Student';
